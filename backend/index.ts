@@ -39,7 +39,7 @@ app.doc('/doc', {
   },
   servers: [
     {
-      url: 'https://prashamhtrivedi-resumeparser.val.run/api',
+      url: 'https://prashamhtrivedi-resumeparser.val.run',
       description: 'Resume Praser APIs'
     }
   ]

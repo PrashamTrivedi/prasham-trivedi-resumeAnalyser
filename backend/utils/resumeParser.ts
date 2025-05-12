@@ -12,7 +12,7 @@ import {
   DateRange
 } from '../types/resume.ts';
 import { generatePrompt } from '../prompts/resumePrompts.ts';
-import { parseResumeWithAI } from './openai.ts';
+import { parseResumeWithAI, validateResumeWithAI, retryExtractionIfNeeded } from './openai.ts';
 
 /**
  * Helper function to create a confidence field with a value and confidence score
@@ -37,161 +37,218 @@ function createConfidenceField<T>(
  * @returns Structured resume data with confidence scores
  */
 export async function extractResumeData(
-  resumeText: string, 
+  resumeText: string,
   options?: ResumeParserOptions
 ): Promise<ParsedResume> {
   try {
     console.log('Extracting data from resume text...');
-    console.log('Using prompt:', generatePrompt('extract'));
-    
+
+    // Apply configuration options
+    const confidenceThreshold = options?.confidenceThreshold || 0.3;
+    const standardizationEnabled = options?.standardizationEnabled !== false; // Default to true
+
     // Step 1: Initial extraction with OpenAI
-    // In the full implementation, we'll call parseResumeWithAI here
-    // const rawData = await parseResumeWithAI(resumeText);
-    
-    // Step 2: Add confidence scores
-    // const dataWithConfidence = addConfidenceScores(rawData);
-    
-    // Step 3: Validate and standardize the data
-    // const validatedData = validateAndStandardize(dataWithConfidence);
-    
-    // For now, return a placeholder response with the new confidence field structure
-    return {
-      personalInfo: {
-        name: createConfidenceField('John Doe', 0.95),
-        email: createConfidenceField('john.doe@example.com', 0.95),
-        phone: createConfidenceField('(123) 456-7890', 0.9),
-        location: createConfidenceField('New York, NY', 0.85),
-        linkedin: createConfidenceField('linkedin.com/in/johndoe', 0.8),
-        github: createConfidenceField('github.com/johndoe', 0.8),
-        website: createConfidenceField(null, 0),
-        summary: createConfidenceField('Experienced software engineer with expertise in TypeScript and React.', 0.7)
-      },
-      skills: [
-        {
-          name: createConfidenceField('JavaScript', 0.95),
-          category: createConfidenceField('Programming Languages', 0.9),
-          proficiency: createConfidenceField('Expert', 0.8),
-          yearsOfExperience: createConfidenceField(5, 0.7)
-        },
-        {
-          name: createConfidenceField('TypeScript', 0.95),
-          category: createConfidenceField('Programming Languages', 0.9),
-          proficiency: createConfidenceField('Expert', 0.8),
-          yearsOfExperience: createConfidenceField(3, 0.7)
-        },
-        {
-          name: createConfidenceField('React', 0.95),
-          category: createConfidenceField('Frontend Frameworks', 0.9),
-          proficiency: createConfidenceField('Advanced', 0.8),
-          yearsOfExperience: createConfidenceField(4, 0.7)
-        }
-      ],
-      workExperience: [
-        {
-          company: createConfidenceField('Example Company', 0.95),
-          title: createConfidenceField('Senior Software Engineer', 0.9),
-          location: createConfidenceField('New York, NY', 0.85),
-          dates: {
-            startDate: createConfidenceField('2019-01', 0.9),
-            endDate: createConfidenceField(null, 0),
-            durationInMonths: createConfidenceField(48, 0.8),
-            current: createConfidenceField(true, 0.95)
-          },
-          responsibilities: createConfidenceField([
-            'Developed web applications using React and TypeScript',
-            'Implemented CI/CD pipelines using GitHub Actions',
-            'Led a team of 5 developers on a major product redesign'
-          ], 0.85),
-          technologies: createConfidenceField([
-            'React', 'TypeScript', 'Node.js', 'GitHub Actions'
-          ], 0.9),
-          achievements: createConfidenceField([
-            'Reduced application load time by 40%',
-            'Implemented new features that increased user engagement by 25%'
-          ], 0.7)
-        }
-      ],
-      education: [
-        {
-          institution: createConfidenceField('Example University', 0.95),
-          degree: createConfidenceField('Bachelor of Science', 0.9, 'Standardized from "BS"'),
-          field: createConfidenceField('Computer Science', 0.95),
-          dates: {
-            startDate: createConfidenceField('2015-09', 0.9),
-            endDate: createConfidenceField('2019-05', 0.9),
-            durationInMonths: createConfidenceField(45, 0.8),
-            current: createConfidenceField(false, 0.95)
-          },
-          gpa: createConfidenceField('3.8/4.0', 0.7),
-          coursework: createConfidenceField([
-            'Data Structures and Algorithms',
-            'Computer Networks',
-            'Database Systems'
-          ], 0.7),
-          achievements: createConfidenceField([
-            'Dean\'s List all semesters',
-            'Senior project award winner'
-          ], 0.6)
-        }
-      ],
-      projects: [
-        {
-          name: createConfidenceField('Personal Portfolio Website', 0.95),
-          description: createConfidenceField('A responsive portfolio website showcasing my projects and skills', 0.9),
-          technologies: createConfidenceField(['React', 'TypeScript', 'Tailwind CSS'], 0.95),
-          urls: createConfidenceField(['https://johndoe.com'], 0.7),
-          dates: createConfidenceField({
-            startDate: createConfidenceField('2022-06', 0.7),
-            endDate: createConfidenceField('2022-08', 0.7),
-            durationInMonths: createConfidenceField(3, 0.6),
-            current: createConfidenceField(false, 0.8)
-          }, 0.7),
-          role: createConfidenceField('Solo Developer', 0.8)
-        }
-      ],
-      certifications: [
-        {
-          name: createConfidenceField('AWS Certified Developer', 0.95),
-          issuer: createConfidenceField('Amazon Web Services', 0.9),
-          date: createConfidenceField('2021-03', 0.8),
-          expiryDate: createConfidenceField('2024-03', 0.8),
-          id: createConfidenceField('AWS-DEV-12345', 0.7)
-        }
-      ],
-      languages: [
-        {
-          name: createConfidenceField('English', 0.95),
-          proficiency: createConfidenceField('Native', 0.9)
-        },
-        {
-          name: createConfidenceField('Spanish', 0.9),
-          proficiency: createConfidenceField('Intermediate', 0.8)
-        }
-      ],
-      overallConfidence: 0.87,
-      missingFields: ['personalInfo.website'],
-      detectedSections: ['personal_information', 'skills', 'experience', 'education', 'projects', 'certifications', 'languages']
-    };
+    console.log('Step 1: Performing initial extraction with OpenAI');
+    let extractedData = await parseResumeWithAI(resumeText, options);
+
+    if (!extractedData) {
+      throw new Error('Failed to extract data from resume');
+    }
+
+    // Step 2: Retry extraction if initial results have issues
+    console.log('Step 2: Checking extraction quality and retrying if needed');
+    extractedData = await retryExtractionIfNeeded(extractedData, resumeText);
+
+    // Step 3: Validate and standardize the data if enabled
+    let processedData = extractedData;
+    if (standardizationEnabled) {
+      console.log('Step 3: Validating and standardizing extracted data');
+      processedData = await validateResumeWithAI(extractedData);
+    }
+
+    // Step 4: Post-process the data (apply confidence thresholds, fill missing calculations)
+    console.log('Step 4: Post-processing and final validation');
+    const result = postProcessResumeData(processedData, confidenceThreshold);
+
+    // Log completion status and confidence
+    if (result.overallConfidence >= 0.7) {
+      console.log('Resume extraction completed successfully with high confidence:', result.overallConfidence);
+    } else if (result.overallConfidence >= 0.5) {
+      console.log('Resume extraction completed with moderate confidence:', result.overallConfidence);
+    } else {
+      console.log('Resume extraction completed with low confidence:', result.overallConfidence);
+      console.log('Missing fields:', result.missingFields);
+    }
+
+    return result;
+
   } catch (error) {
     console.error('Error extracting resume data:', error);
-    throw new Error('Failed to extract resume data');
+    throw new Error(`Failed to extract resume data: ${(error as Error).message}`);
   }
 }
 
 /**
+ * Post-process resume data after AI extraction and validation
+ *
+ * @param data Extracted and validated resume data
+ * @param confidenceThreshold Minimum confidence threshold for fields
+ * @returns Finalized resume data
+ */
+function postProcessResumeData(data: any, confidenceThreshold: number = 0.3): ParsedResume {
+  try {
+    // Ensure we have all required sections with at least empty arrays
+    const processed: ParsedResume = {
+      personalInfo: data.personalInfo || createDefaultPersonalInfo(),
+      skills: data.skills || [],
+      workExperience: data.workExperience || [],
+      education: data.education || [],
+      projects: data.projects || [],
+      certifications: data.certifications || [],
+      languages: data.languages || [],
+      overallConfidence: data.overallConfidence || 0,
+      missingFields: data.missingFields || [],
+      detectedSections: data.detectedSections || []
+    };
+
+    // Calculate missing durations in work experience
+    processed.workExperience = processed.workExperience.map(exp => {
+      if (exp.dates) {
+        // Calculate duration if not already provided
+        if (!exp.dates.durationInMonths.value && exp.dates.startDate.value) {
+          const startDate = new Date(exp.dates.startDate.value);
+          const endDate = exp.dates.endDate.value ? new Date(exp.dates.endDate.value) : new Date();
+
+          if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+            const months = calculateMonthsBetween(startDate, endDate);
+            exp.dates.durationInMonths = createConfidenceField(months, 0.8);
+          }
+        }
+      }
+      return exp;
+    });
+
+    // Perform similar calculations for education dates
+    processed.education = processed.education.map(edu => {
+      if (edu.dates) {
+        if (!edu.dates.durationInMonths.value && edu.dates.startDate.value) {
+          const startDate = new Date(edu.dates.startDate.value);
+          const endDate = edu.dates.endDate.value ? new Date(edu.dates.endDate.value) : new Date();
+
+          if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+            const months = calculateMonthsBetween(startDate, endDate);
+            edu.dates.durationInMonths = createConfidenceField(months, 0.8);
+          }
+        }
+      }
+      return edu;
+    });
+
+    // Calculate updated overall confidence score
+    const confidenceValues: number[] = [];
+
+    // Add personal info confidences
+    Object.values(processed.personalInfo).forEach(field => {
+      if (field && typeof field.confidence === 'number') {
+        confidenceValues.push(field.confidence);
+      }
+    });
+
+    // Add skills confidences
+    processed.skills.forEach(skill => {
+      confidenceValues.push(skill.name.confidence);
+    });
+
+    // Add work experience confidences (weighted higher)
+    processed.workExperience.forEach(exp => {
+      confidenceValues.push(exp.company.confidence * 1.5);
+      confidenceValues.push(exp.title.confidence * 1.5);
+    });
+
+    // Add education confidences (weighted higher)
+    processed.education.forEach(edu => {
+      confidenceValues.push(edu.institution.confidence * 1.5);
+      confidenceValues.push(edu.degree.confidence * 1.5);
+    });
+
+    // Calculate average confidence
+    if (confidenceValues.length > 0) {
+      processed.overallConfidence = confidenceValues.reduce((sum, val) => sum + val, 0) / confidenceValues.length;
+    } else {
+      processed.overallConfidence = 0;
+    }
+
+    // Round to 2 decimal places
+    processed.overallConfidence = Math.round(processed.overallConfidence * 100) / 100;
+
+    // Update missing fields by checking all required fields
+    const updatedMissingFields: string[] = [];
+
+    // Check personal info required fields
+    const requiredPersonalFields = ['name', 'email', 'phone'];
+    requiredPersonalFields.forEach(field => {
+      const value = (processed.personalInfo as any)[field]?.value;
+      if (!value || (processed.personalInfo as any)[field].confidence < confidenceThreshold) {
+        updatedMissingFields.push(`personalInfo.${field}`);
+      }
+    });
+
+    // Skills, work experience, education must have at least one entry
+    if (processed.skills.length === 0) {
+      updatedMissingFields.push('skills');
+    }
+
+    if (processed.workExperience.length === 0) {
+      updatedMissingFields.push('workExperience');
+    }
+
+    if (processed.education.length === 0) {
+      updatedMissingFields.push('education');
+    }
+
+    processed.missingFields = updatedMissingFields;
+
+    return processed;
+  } catch (error) {
+    console.error('Error in post-processing resume data:', error);
+    // Return original data if post-processing fails
+    return data as ParsedResume;
+  }
+}
+
+/**
+ * Create a default personal info object with empty fields
+ */
+function createDefaultPersonalInfo(): PersonalInfo {
+  return {
+    name: createConfidenceField('', 0),
+    email: createConfidenceField('', 0),
+    phone: createConfidenceField('', 0),
+    location: createConfidenceField(null, 0),
+    linkedin: createConfidenceField(null, 0),
+    github: createConfidenceField(null, 0),
+    website: createConfidenceField(null, 0),
+    summary: createConfidenceField(null, 0)
+  };
+}
+
+/**
+ * Calculate months between two dates
+ */
+function calculateMonthsBetween(startDate: Date, endDate: Date): number {
+  return (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+    (endDate.getMonth() - startDate.getMonth());
+}
+
+/**
  * Validate and standardize resume data
- * 
+ *
  * @param data Raw resume data
  * @returns Validated and standardized resume data
  */
 export function validateAndStandardize(data: ParsedResume): ParsedResume {
-  // This function will:
-  // 1. Validate all fields to ensure they meet expected formats
-  // 2. Standardize terminology (e.g., degree names, job titles)
-  // 3. Calculate missing fields (e.g., duration from start/end dates)
-  // 4. Update confidence scores based on validation results
-  
-  // For now, we'll just return the input data
+  // This function is now deprecated in favor of the validateResumeWithAI function
+  // which uses OpenAI to validate and standardize the data
   return data;
 }
 
