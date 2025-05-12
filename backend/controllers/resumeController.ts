@@ -1,6 +1,6 @@
-import { OpenAPIHono } from 'npm:@hono/zod-openapi'
-import { createRoute } from 'npm:@hono/zod-openapi'
-import { extractResumeData } from '../utils/resumeParser.ts'
+import {OpenAPIHono} from 'npm:@hono/zod-openapi'
+import {createRoute} from 'npm:@hono/zod-openapi'
+import {extractResumeData} from '../utils/resumeParser.ts'
 import {
   ResumeParserRequest,
   ParseResumeResponse,
@@ -65,7 +65,7 @@ const parseResumeRoute = createRoute({
 resumeRouter.openapi(parseResumeRoute, async (c) => {
   try {
     // Extract request body with validation
-    const { resumeText, options } = c.req.valid('json')
+    const {resumeText, options} = c.req.valid('json')
 
     // Extract resume data with confidence scoring
     const parsedResume = await extractResumeData(resumeText, options)
@@ -90,31 +90,6 @@ resumeRouter.openapi(parseResumeRoute, async (c) => {
   }
 })
 
-// Define the schema route
-const schemaRoute = createRoute({
-  method: 'get',
-  path: '/schema',
-  tags: ['System'],
-  summary: 'Get Schema',
-  description: 'Return the schema definition for the resume parser',
-  responses: {
-    200: {
-      description: 'Schema returned successfully',
-      content: {
-        'application/json': {
-          schema: ParsedResumeSchema
-        }
-      }
-    }
-  }
-})
 
-// Register the schema route
-resumeRouter.openapi(schemaRoute, (c) => {
-  return c.json({
-    resumeParserRequest: ResumeParserRequestSchema.openapi.toJSON(),
-    parsedResume: ParsedResumeSchema.openapi.toJSON()
-  })
-})
 
 export default resumeRouter
