@@ -2,17 +2,26 @@
 
 ![Resume Analyzer Demo](screenshots/resumeAnalyserPage.png)
 
-Welcome to the Resume Analyzer project! This AI-powered tool extracts structured, validated data from unstructured resume content with a unique confidence scoring mechanism that sets it apart from standard parsers.
+Welcome to the Resume Analyzer project! This AI-powered tool extracts
+structured, validated data from unstructured resume content with a unique
+confidence scoring mechanism that sets it apart from standard parsers.
 
 ## Key Features
 
-- **🎯 Advanced Confidence Scoring**: Every extracted field includes a confidence score (0-1) with visual indicators
-- **🔄 Intelligent Standardization**: Automatically normalizes job titles, skill names, and degree formats with transformation notes
-- **⚠️ Field Validation**: Identifies inconsistencies, overlaps, and missing information
-- **🧠 Multi-stage Parsing**: Three-phase extraction with fallback mechanisms for challenging content
-- **🎨 Rich Visualization**: Clear, intuitive UI showing confidence levels and standardization details
-- **🚀 Edge Case Handling**: Specialized processing for non-standard resume formats
-- **⚡ High Performance**: Built on modern serverless architecture for unlimited processing time
+- **🎯 Advanced Confidence Scoring**: Every extracted field includes a
+  confidence score (0-1) with visual indicators
+- **🔄 Intelligent Standardization**: Automatically normalizes job titles, skill
+  names, and degree formats with transformation notes
+- **⚠️ Field Validation**: Identifies inconsistencies, overlaps, and missing
+  information
+- **🧠 Multi-stage Parsing**: Three-phase extraction with fallback mechanisms
+  for challenging content
+- **🎨 Rich Visualization**: Clear, intuitive UI showing confidence levels and
+  standardization details
+- **🚀 Edge Case Handling**: Specialized processing for non-standard resume
+  formats
+- **⚡ High Performance**: Built on modern serverless architecture for unlimited
+  processing time
 
 ## Architecture Overview
 
@@ -45,20 +54,25 @@ graph TB
     subgraph "OpenAI"
         F <--> |API Call| I[GPT-4o]
     end
-    
-   
 ```
 
-This architecture was specifically chosen to maximize development velocity while demonstrating production-ready thinking. The ValTown backend eliminates the typical timeout issues that plague serverless platforms when dealing with LLM operations.
+This architecture was specifically chosen to maximize development velocity while
+demonstrating production-ready thinking. The ValTown backend eliminates the
+typical timeout issues that plague serverless platforms when dealing with LLM
+operations.
 
 ### Core Architecture
 
-This solution implements a hybrid architecture optimized for rapid deployment and maximum performance:
+This solution implements a hybrid architecture optimized for rapid deployment
+and maximum performance:
 
-- **Frontend**: Next.js deployed on Vercel - providing a clean UI with React Server Components
-- **Backend API**: ValTown serverless functions - giving us unlimited runtime for LLM operations
+- **Frontend**: Next.js deployed on Vercel - providing a clean UI with React
+  Server Components
+- **Backend API**: ValTown serverless functions - giving us unlimited runtime
+  for LLM operations
 - **LLM Integration**: OpenAI GPT-4o for high-quality structured data extraction
-- **Storage**: In-memory for demo purposes with documented path to Supabase implementation
+- **Storage**: In-memory for demo purposes with documented path to Supabase
+  implementation
 
 ### Resume Parsing Flow
 
@@ -104,11 +118,15 @@ sequenceDiagram
 
 The backend uses a three-step parsing process:
 
-1. **Initial Extraction**: OpenAI GPT-4o parses the resume with structured output
-2. **Validation & Standardization**: Field validation with terminology standardization
-3. **Confidence Scoring**: Detailed confidence assessment for each extracted field
+1. **Initial Extraction**: OpenAI GPT-4o parses the resume with structured
+   output
+2. **Validation & Standardization**: Field validation with terminology
+   standardization
+3. **Confidence Scoring**: Detailed confidence assessment for each extracted
+   field
 
 Key components:
+
 - `resumeParser.ts`: Core extraction logic and post-processing
 - `openai.ts`: LLM integration with retry mechanisms
 - `resumePrompts.ts`: Specialized prompts for different extraction phases
@@ -116,14 +134,21 @@ Key components:
 
 #### ValTown API Services with Hono Framework
 
-ValTown provides a powerful serverless JavaScript/TypeScript runtime that's perfectly suited for Hono - a lightweight (~14KB) web framework built on Web Standards. This combination gives us:
+ValTown provides a powerful serverless JavaScript/TypeScript runtime that's
+perfectly suited for Hono - a lightweight (~14KB) web framework built on Web
+Standards. This combination gives us:
 
-- **Unlimited Runtime for LLM Ops**: No 10-second timeout limitations that plague other serverless platforms
-- **Ultra-Fast Routing**: Hono's RegExpRouter delivers performance other frameworks can't match
-- **Zero Configuration Deployment**: Instant API endpoints without infrastructure setup
+- **Unlimited Runtime for LLM Ops**: No 10-second timeout limitations that
+  plague other serverless platforms
+- **Ultra-Fast Routing**: Hono's RegExpRouter delivers performance other
+  frameworks can't match
+- **Zero Configuration Deployment**: Instant API endpoints without
+  infrastructure setup
 - **TypeScript-Native**: Full type safety across your entire API surface
-- **Middleware Power**: Hono's middleware ecosystem for validation, auth, and error handling
-- **Multi-Runtime Compatibility**: Code that can be easily ported to AWS when ready
+- **Middleware Power**: Hono's middleware ecosystem for validation, auth, and
+  error handling
+- **Multi-Runtime Compatibility**: Code that can be easily ported to AWS when
+  ready
 
 ### Frontend (Next.js)
 
@@ -147,16 +172,18 @@ We're leveraging Next.js 14 with App Router for our frontend because:
 Our parsing approach uses a strategic pattern with OpenAI's GPT-4o:
 
 - **Initial extraction**: Structured data extraction with confidence assessment
-- **Retry mechanism**: Focused re-parsing when initial extraction has low confidence
+- **Retry mechanism**: Focused re-parsing when initial extraction has low
+  confidence
 - **Validation pass**: Standard terminology and format verification
-- **Confidence scoring**: Built into the prompt architecture for field-level reliability
+- **Confidence scoring**: Built into the prompt architecture for field-level
+  reliability
 
 ## Confidence Scoring: Our Key Differentiator
 
-Our confidence scoring mechanism uniquely addresses the limitations of traditional resume parsers:
+Our confidence scoring mechanism uniquely addresses the limitations of
+traditional resume parsers:
 
 ![Confidence Score Example](screenshots/overallConfidenceScore.png)
-
 
 ![Tooltips to show standards](screenshots/standardizationTooltip.png)
 
@@ -182,126 +209,107 @@ Our confidence scoring mechanism uniquely addresses the limitations of tradition
    - Potential issues requiring manual review
    - Overall quality assessment of the parsed resume
 
-This confidence scoring system empowers recruiters to make informed decisions about the reliability of extracted data, eliminating the "black box" problem of traditional parsers.
+This confidence scoring system empowers recruiters to make informed decisions
+about the reliability of extracted data, eliminating the "black box" problem of
+traditional parsers.
 
 ## Technical Decisions and Tradeoffs
 
 ### ValTown for Backend
 
 **Advantages:**
+
 - Greater runtime for LLM operations (10 minutes timeout)
 - Zero configuration deployment
 - TypeScript-native environment
 
 **Tradeoffs:**
+
 - Limited ecosystem compared to AWS/GCP
 - Restricted to JavaScript/TypeScript
 
 ### OpenAI GPT-4o
 
 **Advantages:**
+
 - Excellent structured data extraction capabilities
 - Strong understanding of resume formats and conventions
 - Ability to handle different resume layouts
 - Multi-stage parsing with built-in retry for challenging content
 
 **Tradeoffs:**
+
 - API costs for production use
 - Small potential for hallucination in ambiguous cases
 
 ### Next.js Frontend
 
 **Advantages:**
+
 - Server Components reduce client-side JavaScript
 - Built-in API routes
 - TypeScript support
 
 **Tradeoffs:**
+
 - Larger bundle size than minimal frameworks
 - Learning curve for App Router
 
 ## Setup and Deployment Instructions
 
-### Local Development
+### Local Development & Remixing
 
-#### Backend (ValTown)
+Want to run your own version of Resume Analyzer? Here's how to do it:
 
-1. Install Val Town CLI:
+#### Frontend
+
+The frontend is a standard Next.js application that can be run locally:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+This will start the development server on http://localhost:3000.
+
+#### Backend
+
+The backend is hosted on ValTown, which means:
+
+1. You can't directly run it locally like a traditional server
+2. You can remix (fork) it and deploy your own version
+
+#### Remixing on ValTown
+
+1. Visit the original val on ValTown
+2. Click the "Remix" button to create your own copy
+3. Set the required environment variable:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+
+#### Local Development with ValTown
+
+While you can't "run" the backend locally, you can develop locally and sync:
+
+1. Install the ValTown CLI:
    ```bash
    deno install -grAf jsr:@valtown/vt
    ```
 
-   Or if you would prefer a more descriptive command with minimal permissions:
-
+2. Check out your val locally:
    ```bash
-   deno install --global --force --reload --allow-read --allow-write --allow-env --allow-net jsr:@valtown/vt
+   vt checkout username/valname ./my-local-directory
    ```
 
-2. Authenticate with Val Town:
-   ```bash
-   vt auth
-   ```
+3. Make local edits to the code
 
-   You should get the dialog:
-
-   ```
-   Welcome to the Val Town CLI!
-
-     VT is a companion CLI to interface with Val Town Vals.
-
-     With this CLI, you can:
-     - Create and manage Val Town Vals
-     - Push and pull changes between your local system and Val Town
-     - Watch a directory to keep it automatically synced with Val Town
-     - And more!
-
-     To get started, you need to authenticate with Val Town.
-
-   ? Would you like to open val.town/settings/api in a browser to get an API key? (y/n) ›
-   ```
-
-   Respond yes, and ensure you select to create an API key with user read & val read+write permissions.
-
-   Alternatively, you can set the `VAL_TOWN_API_KEY` environment variable to authenticate.
-
-3. Clone the repository and navigate to the backend directory:
-   ```bash
-   git clone https://github.com/your-username/resume-analyzer.git
-   cd resume-analyzer/backend
-   ```
-
-4. Set up environment variables:
-   Create a `.env` file with:
-   ```
-   OPENAI_API_KEY=your_openai_key
-   ```
-
-5. Push your backend to Val Town:
+4. Push your changes back to ValTown:
    ```bash
    vt push
    ```
 
-#### Frontend (Next.js)
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd ../frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create `.env.local` file with:
-   ```
-   NEXT_PUBLIC_API_URL=https://your-val.val.run/api
-   ```
-
-4. Start development server:
-   ```bash
-   npm run dev
-   ```
+This workflow allows you to use your preferred editor while still deploying to
+ValTown's serverless environment.
 
 ### Production Deployment
 
@@ -330,7 +338,8 @@ This confidence scoring system empowers recruiters to make informed decisions ab
 
 ## Development Workflow
 
-To manage code between local development and Val Town, we need to run the following commands:
+To manage code between local development and Val Town, we need to run the
+following commands:
 
 ```bash
 git commit -m "Your commit message"
@@ -338,19 +347,22 @@ git push
 vt push
 ```
 
-This ensures that your code is both tracked in version control and deployed to Val Town's serverless environment.
+This ensures that your code is both tracked in version control and deployed to
+Val Town's serverless environment.
 
 ## Sample Usage
 
 1. **Input Resume**: Paste your resume text into the input area.
 2. **Process**: Click "Parse Resume" to send to the backend for analysis.
 3. **Review Results**: Examine the parsed data with confidence indicators.
-4. **Explore Details**: Hover over fields to see standardization notes and confidence scores.
+4. **Explore Details**: Hover over fields to see standardization notes and
+   confidence scores.
 5. **Check Missing Fields**: Review any information that couldn't be extracted.
 
 ## Testing
 
 The system has been tested against various resume formats including:
+
 - Standard chronological resumes
 - Skills-based resumes
 - Academic CVs
@@ -359,16 +371,23 @@ The system has been tested against various resume formats including:
 
 ## Future Improvements
 
-- **Advanced Caching**: Implement caching for similar resume patterns to improve performance
-- **Database Integration**: Replace in-memory storage with Supabase for persistence
+- **Advanced Caching**: Implement caching for similar resume patterns to improve
+  performance
+- **Database Integration**: Replace in-memory storage with Supabase for
+  persistence
 - **PDF Support**: Add capability to directly upload and parse PDF resumes
-- **Prompt Refinements**: Update Prompts to indicate and look deeper with reasoning models
+- **Prompt Refinements**: Update Prompts to indicate and look deeper with
+  reasoning models
 - **ATS Integration**: Develop connectors for popular Applicant Tracking Systems
-- **Batch Processing**: Add capability for parsing multiple resumes simultaneously
-- **Industry-Specific Models**: Create specialized parsers for different industries
+- **Batch Processing**: Add capability for parsing multiple resumes
+  simultaneously
+- **Industry-Specific Models**: Create specialized parsers for different
+  industries
 - **User Feedback Loop**: Implement mechanism to learn from user corrections
-- **Better confidence scores**: Move away from default confidence score and calculation so that calculation isn't biased
-- **Mathematical access to Prompts**: So that they can confidently output proper calculations
+- **Better confidence scores**: Move away from default confidence score and
+  calculation so that calculation isn't biased
+- **Mathematical access to Prompts**: So that they can confidently output proper
+  calculations
 
 ---
 
