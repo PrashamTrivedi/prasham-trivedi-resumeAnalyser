@@ -240,17 +240,6 @@ function calculateMonthsBetween(startDate: Date, endDate: Date): number {
     (endDate.getMonth() - startDate.getMonth());
 }
 
-/**
- * Validate and standardize resume data
- *
- * @param data Raw resume data
- * @returns Validated and standardized resume data
- */
-export function validateAndStandardize(data: ParsedResume): ParsedResume {
-  // This function is now deprecated in favor of the validateResumeWithAI function
-  // which uses OpenAI to validate and standardize the data
-  return data;
-}
 
 /**
  * Calculate confidence score for a field based on various factors

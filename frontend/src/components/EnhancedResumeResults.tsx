@@ -38,7 +38,7 @@ export default function EnhancedResumeResults({ apiResponse }: EnhancedResumeRes
           <div>
             <h3 className="text-xl leading-6 font-bold text-white">Parsed Resume</h3>
             <p className="mt-2 text-sm text-white/90">
-              Here's the structured data extracted from your resume
+              Here&apos;s the structured data extracted from your resume
             </p>
           </div>
           <div className="text-right text-white">

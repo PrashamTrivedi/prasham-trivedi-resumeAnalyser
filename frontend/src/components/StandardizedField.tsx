@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 interface StandardizedFieldProps {
-  value: string | number | null | boolean | Array<any>;
+  value: string | number | null | boolean | Array<string | number | boolean>;
   standardization?: string | null;
   confidence?: number;
   isMissing?: boolean;

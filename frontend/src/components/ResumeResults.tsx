@@ -14,7 +14,7 @@ export default function ResumeResults({ resumeData }: ResumeResultsProps) {
       <div className="result-header px-6 py-5">
         <h3 className="text-xl leading-6 font-bold text-text">Parsed Resume</h3>
         <p className="mt-2 text-sm text-text-muted">
-          Here's the structured data extracted from your resume
+          Here&apos;s the structured data extracted from your resume
         </p>
       </div>
       <div>

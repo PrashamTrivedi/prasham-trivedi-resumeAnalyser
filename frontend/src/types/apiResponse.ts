@@ -60,9 +60,9 @@ export interface ParsedResumeData {
   skills: Skill[];
   workExperience: WorkExperience[];
   education: Education[];
-  projects: any[]; // Can be expanded if needed
-  certifications: any[]; // Can be expanded if needed
-  languages: any[]; // Can be expanded if needed
+  projects: FieldValue<string>[]; // Can be expanded if needed
+  certifications: FieldValue<string>[]; // Can be expanded if needed
+  languages: FieldValue<string>[]; // Can be expanded if needed
   overallConfidence: number;
   missingFields: string[];
   detectedSections: string[];
