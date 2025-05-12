@@ -86,7 +86,7 @@ export default function StandardizedField({
     >
       <span className={`${hasStandardization ? 'border-b border-dotted border-primary cursor-help' : ''}`}>
         {displayValue}
-        {hasStandardization && (
+        {hasStandardization && standardization !== displayValue && (
           <span className="ml-1 text-primary">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -102,7 +102,7 @@ export default function StandardizedField({
       </span>
       
       {/* Confidence indicator (small dot with color) */}
-      {confidence > 0 && (
+      {confidence > 50 && (
         <span 
           className={`absolute -top-1 -right-2 text-lg font-bold ${getConfidenceColor()}`}
           title={`Confidence: ${confidencePercentage}%`}
@@ -113,7 +113,7 @@ export default function StandardizedField({
       )}
       
       {/* Tooltip */}
-      {showTooltip && hasStandardization && (
+      {showTooltip && hasStandardization && standardization !== displayValue && (
         <div 
           ref={tooltipRef}
           id="standardization-tooltip"

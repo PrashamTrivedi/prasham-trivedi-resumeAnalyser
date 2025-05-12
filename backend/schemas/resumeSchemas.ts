@@ -272,9 +272,9 @@ export const ErrorResponseSchema = z.object({
 //Simplified ConfidenceFieldSchema
 export const SimplifiedConfidenceFieldSchema = <T extends z.ZodTypeAny>(valueSchema: T) =>
   z.object({
-    value: valueSchema,
+    value: valueSchema.describe("The original value passed, keep this as it is."),
     confidence: z.number().describe("A confidence score between 0 to 1 about clarity and standardise termwords, 0 is for not clear and not standard and 1 is for clear and standard terms. Abbreviations are not standard"),
-    standardization: z.string().describe("If the value has confidence >0.8 keep blank, Otherwise pass in following format, suitable for tooltip: UpdatedStandardValue=ReasonBehindUpdation")
+    standardization: z.string().describe("If the value has confidence > 0.8 keep pass the original value as is, Otherwise pass in following format, suitable for tooltip: UpdatedStandardValue=ReasonBehindUpdation")
   })
 // Create a simplified schema for OpenAI with fewer parameters
 // This addresses the 100 parameter limit in OpenAI's response_format
