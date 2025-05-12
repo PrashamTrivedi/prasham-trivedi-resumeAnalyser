@@ -16,6 +16,41 @@ Welcome to the Resume Analyzer project! This AI-powered tool extracts structured
 
 ## Architecture Overview
 
+### System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph Client
+        A[User Browser] --> |Submit Resume Text| B[Next.js Frontend]
+        B --> |Display Results| A
+    end
+    
+    subgraph "Vercel"
+        B --> |API Call| C[API Routes]
+    end
+    
+    subgraph "ValTown"
+        D[Hono API] --> |Extract Data| E[Resume Parser]
+        E --> |Initial Extraction| F[OpenAI Integration]
+        F --> |JSON Response| E
+        E --> |Validate & Standardize| G[Validation Layer]
+        G --> E
+        E --> |Add Confidence| H[Confidence Scoring]
+        H --> E
+    end
+    
+    C --> |HTTPS Request| D
+    D --> |Response with Confidence| C
+    
+    subgraph "OpenAI"
+        F <--> |API Call| I[GPT-4o]
+    end
+    
+   
+```
+
+This architecture was specifically chosen to maximize development velocity while demonstrating production-ready thinking. The ValTown backend eliminates the typical timeout issues that plague serverless platforms when dealing with LLM operations.
+
 ### Core Architecture
 
 This solution implements a hybrid architecture optimized for rapid deployment and maximum performance:
@@ -25,7 +60,45 @@ This solution implements a hybrid architecture optimized for rapid deployment an
 - **LLM Integration**: OpenAI GPT-4o for high-quality structured data extraction
 - **Storage**: In-memory for demo purposes with documented path to Supabase implementation
 
-This architecture was specifically chosen to maximize development velocity while demonstrating production-ready thinking. The ValTown backend eliminates the typical timeout issues that plague serverless platforms when dealing with LLM operations.
+### Resume Parsing Flow
+
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant Frontend as Next.js Frontend
+    participant Backend as ValTown API
+    participant Parser as Resume Parser
+    participant OpenAI as OpenAI GPT-4o
+    
+    User->>Frontend: Paste resume text
+    Frontend->>Backend: POST /api/parse
+    Backend->>Parser: Extract resume data
+    
+    %% Initial Extraction
+    Parser->>OpenAI: Send resume with extraction prompt
+    OpenAI-->>Parser: Return structured JSON with initial confidence
+    
+    %% Check Extraction Quality
+    Parser->>Parser: Evaluate extraction quality
+    
+    alt Low confidence or missing fields
+        Parser->>OpenAI: Retry with focused prompt
+        OpenAI-->>Parser: Return improved extraction
+    end
+    
+    %% Validate and Standardize
+    Parser->>OpenAI: Send for validation & standardization
+    OpenAI-->>Parser: Return validated data with standardization notes
+    
+    %% Post-processing
+    Parser->>Parser: Calculate confidence scores
+    Parser->>Parser: Process missing fields
+    Parser->>Parser: Finalize dates and calculations
+    
+    Parser-->>Backend: Return parsed resume with confidence
+    Backend-->>Frontend: Return API response
+    Frontend->>User: Display parsed resume with confidence indicators
+```
 
 ### Backend (ValTown + Hono)
 
