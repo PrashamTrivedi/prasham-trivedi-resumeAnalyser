@@ -282,7 +282,7 @@ The backend is hosted on ValTown, which means:
 
 #### Remixing on ValTown
 
-1. Visit the original val on ValTown
+1. Visit the [original val on ValTown](https://www.val.town/x/prashamtrivedi/resume-parser/)
 2. Click the "Remix" button to create your own copy
 3. Set the required environment variable:
    - `OPENAI_API_KEY`: Your OpenAI API key
