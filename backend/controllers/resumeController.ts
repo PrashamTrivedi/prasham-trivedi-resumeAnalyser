@@ -1,68 +1,79 @@
-import {Hono} from 'npm:hono'
-import {extractResumeData} from '../utils/resumeParser.ts'
-import {ParseResumeRequest, ParseResumeResponse} from '../types/resume.ts'
+import { OpenAPIHono } from 'npm:@hono/zod-openapi'
+import { createRoute } from 'npm:@hono/zod-openapi'
+import { extractResumeData } from '../utils/resumeParser.ts'
+import {
+  ResumeParserRequest,
+  ParseResumeResponse,
+  ParsedResume
+} from '../types/resume.ts'
+import {
+  ResumeParserRequestSchema,
+  ParsedResumeSchema,
+  ParseResumeResponseSchema,
+  ErrorResponseSchema
+} from '../schemas/resumeSchemas.ts'
 
-const resumeRouter = new Hono()
+const resumeRouter = new OpenAPIHono()
 
-/**
- * POST /api/parse
- * Parse resume text and extract structured data
- */
-resumeRouter.post('/parse', async (c) => {
-  try {
-    // Extract request body
-    const {resumeText} = await c.req.json<ParseResumeRequest>()
-
-    if (!resumeText || typeof resumeText !== 'string') {
-      return c.json<ParseResumeResponse>({
-        success: false,
-        error: {
-          message: 'Resume text is required',
-          code: 'MISSING_RESUME_TEXT'
+// Define the parse resume route
+const parseResumeRoute = createRoute({
+  method: 'post',
+  path: '/parse',
+  tags: ['Resume'],
+  summary: 'Parse Resume',
+  description: 'Parse resume text and extract structured data with confidence scoring',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: ResumeParserRequestSchema
         }
-      }, 400)
-    }
-
-    // Placeholder response - will be implemented with actual parser
-    const placeholderData = {
-      contactDetails: {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '(123) 456-7890',
       },
-      skills: [
-        {
-          name: 'Technical Skills',
-          items: ['JavaScript', 'TypeScript', 'React']
+      required: true,
+      description: 'Resume text and parsing options'
+    }
+  },
+  responses: {
+    200: {
+      description: 'Resume parsed successfully',
+      content: {
+        'application/json': {
+          schema: ParseResumeResponseSchema
         }
-      ],
-      education: [
-        {
-          degree: 'Bachelor of Science in Computer Science',
-          institution: 'Example University',
-          duration: '2015-2019'
+      }
+    },
+    400: {
+      description: 'Invalid request parameters',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema
         }
-      ],
-      workExperience: [
-        {
-          company: 'Example Company',
-          role: 'Software Engineer',
-          duration: '2019-Present',
-          responsibilities: ['Developed web applications', 'Implemented CI/CD pipelines']
+      }
+    },
+    500: {
+      description: 'Server error',
+      content: {
+        'application/json': {
+          schema: ErrorResponseSchema
         }
-      ],
-      confidenceScores: {
-        contactDetails: 0.95,
-        skills: 0.90,
-        education: 0.85,
-        workExperience: 0.80
       }
     }
+  }
+})
 
-    // Return placeholder response
+// Register the route
+resumeRouter.openapi(parseResumeRoute, async (c) => {
+  try {
+    // Extract request body with validation
+    const { resumeText, options } = c.req.valid('json')
+
+    // Extract resume data with confidence scoring
+    const parsedResume = await extractResumeData(resumeText, options)
+
+    // Return parsed response
     return c.json<ParseResumeResponse>({
       success: true,
-      data: placeholderData
+      data: parsedResume
     })
 
   } catch (error) {
@@ -72,10 +83,38 @@ resumeRouter.post('/parse', async (c) => {
       success: false,
       error: {
         message: 'Failed to parse resume',
-        code: 'PARSING_ERROR'
+        code: 'PARSING_ERROR',
+        details: (error as Error).message
       }
     }, 500)
   }
+})
+
+// Define the schema route
+const schemaRoute = createRoute({
+  method: 'get',
+  path: '/schema',
+  tags: ['System'],
+  summary: 'Get Schema',
+  description: 'Return the schema definition for the resume parser',
+  responses: {
+    200: {
+      description: 'Schema returned successfully',
+      content: {
+        'application/json': {
+          schema: ParsedResumeSchema
+        }
+      }
+    }
+  }
+})
+
+// Register the schema route
+resumeRouter.openapi(schemaRoute, (c) => {
+  return c.json({
+    resumeParserRequest: ResumeParserRequestSchema.openapi.toJSON(),
+    parsedResume: ParsedResumeSchema.openapi.toJSON()
+  })
 })
 
 export default resumeRouter

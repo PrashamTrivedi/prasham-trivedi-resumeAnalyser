@@ -1,19 +1,20 @@
 import { Context } from 'npm:hono';
 import { HTTPException } from 'npm:hono/http-exception';
+import { ZodError } from 'npm:zod';
 
 // Interface for structured error responses
 interface ErrorResponse {
   success: false;
   error: {
     message: string;
-    code?: string;
+    code: string;
     details?: unknown;
   };
 }
 
-export const errorHandler = (err: Error | HTTPException, c: Context) => {
+export const errorHandler = (err: Error | HTTPException | ZodError, c: Context) => {
   console.error('Error occurred:', err);
-  
+
   let message = 'Internal Server Error';
   let status = 500;
   let code = 'INTERNAL_ERROR';
@@ -24,7 +25,14 @@ export const errorHandler = (err: Error | HTTPException, c: Context) => {
     message = err.message;
     status = err.status;
     code = `HTTP_${status}`;
-  } 
+  }
+  // Handle Zod validation errors
+  else if (err instanceof ZodError || err.name === 'ZodError') {
+    message = 'Invalid request data';
+    status = 400;
+    code = 'VALIDATION_ERROR';
+    details = err instanceof ZodError ? err.format() : err;
+  }
   // Handle validation errors
   else if (err.name === 'ValidationError') {
     message = 'Validation Error';

@@ -1,15 +1,16 @@
-import { Hono } from 'npm:hono@3.11.4';
-import { cors } from 'npm:hono@3.11.4/cors';
-import { logger } from 'npm:hono@3.11.4/logger';
-import { errorHandler } from './middleware/errorHandler.ts';
-import resumeRouter from './controllers/resumeController.ts';
-import healthRouter from './controllers/healthController.ts';
+import {OpenAPIHono} from 'npm:@hono/zod-openapi'
+import {cors} from 'npm:hono/cors'
+import {logger} from 'npm:hono/logger'
+import {swaggerUI} from 'npm:@hono/swagger-ui'
+import {errorHandler} from './middleware/errorHandler.ts'
+import resumeRouter from './controllers/resumeController.ts'
+import healthRouter from './controllers/healthController.ts'
 
-// Create Hono app
-const app = new Hono();
+// Create OpenAPIHono app
+const app = new OpenAPIHono()
 
 // Global middleware
-app.use('*', logger());
+app.use('*', logger())
 app.use('*', cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'OPTIONS'],
@@ -17,16 +18,35 @@ app.use('*', cors({
   exposeHeaders: ['Content-Length'],
   maxAge: 600,
   credentials: true,
-}));
+}))
 
 // Unwrap Hono errors to see original error details
 app.onError((err, c) => {
-  return errorHandler(err, c);
-});
+  return errorHandler(err, c)
+})
 
 // Mount routers
-app.route('/', healthRouter);
-app.route('/api', resumeRouter);
+app.route('/', healthRouter)
+app.route('/api', resumeRouter)
+
+// OpenAPI documentation
+app.doc('/doc', {
+  openapi: '3.0.0',
+  info: {
+    title: 'Resume Parser API',
+    version: '1.0.0',
+    description: 'API for parsing resumes and extracting structured data with confidence scoring'
+  },
+  servers: [
+    {
+      url: 'https://prashamhtrivedi-resumeparser.val.run/api',
+      description: 'Resume Praser APIs'
+    }
+  ]
+})
+
+// Use the middleware to serve Swagger UI at /api-doc
+app.get('/api-doc', swaggerUI({url: '/doc'}))
 
 // Not found handler
 app.notFound((c) => {
@@ -36,8 +56,8 @@ app.notFound((c) => {
       message: 'Resource not found',
       code: 'NOT_FOUND',
     }
-  }, 404);
-});
+  }, 404)
+})
 
 // This is the entry point for HTTP vals
-export default app.fetch;
+export default app.fetch
