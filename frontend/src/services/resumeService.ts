@@ -1,4 +1,4 @@
-import { ResumeResponse } from '@/types/resume';
+import { ApiResponse } from '@/types/apiResponse';
 
 const API_URL = 'https://prashamhtrivedi-resumeparser.val.run/api/parse';
 
@@ -7,7 +7,7 @@ const API_URL = 'https://prashamhtrivedi-resumeparser.val.run/api/parse';
  * @param resumeText The text content of the resume
  * @returns Parsed resume data
  */
-export async function parseResume(resumeText: string): Promise<ResumeResponse> {
+export async function parseResume(resumeText: string): Promise<ApiResponse> {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',

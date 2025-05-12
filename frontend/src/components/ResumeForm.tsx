@@ -20,9 +20,6 @@ export default function ResumeForm({ onSubmit, isLoading }: ResumeFormProps) {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto">
       <div className="mb-6">
-        <label htmlFor="resumeText" className="block text-sm font-medium mb-2 text-text-muted">
-          Paste your resume text below
-        </label>
         <textarea
           id="resumeText"
           name="resumeText"
@@ -33,6 +30,7 @@ export default function ResumeForm({ onSubmit, isLoading }: ResumeFormProps) {
           onChange={(e) => setResumeText(e.target.value)}
           disabled={isLoading}
           required
+          aria-label="Resume text input"
         />
       </div>
       <div className="flex justify-end">
