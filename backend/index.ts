@@ -1,9 +1,9 @@
 import { Hono } from 'npm:hono@3.11.4';
 import { cors } from 'npm:hono@3.11.4/cors';
 import { logger } from 'npm:hono@3.11.4/logger';
-import { errorHandler } from './middleware/errorHandler';
-import resumeRouter from './controllers/resumeController';
-import healthRouter from './controllers/healthController';
+import { errorHandler } from './middleware/errorHandler.ts';
+import resumeRouter from './controllers/resumeController.ts';
+import healthRouter from './controllers/healthController.ts';
 
 // Create Hono app
 const app = new Hono();

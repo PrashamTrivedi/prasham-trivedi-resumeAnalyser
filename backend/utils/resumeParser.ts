@@ -1,5 +1,5 @@
-import { ResumeData } from '../types/resume';
-import { generatePrompt } from '../prompts/resumePrompts';
+import { ResumeData } from '../types/resume.ts';
+import { generatePrompt } from '../prompts/resumePrompts.ts';
 
 /**
  * Extract structured data from resume text

@@ -1,8 +1,8 @@
-import { Hono } from 'npm:hono';
-import { extractResumeData } from '../utils/resumeParser';
-import { ParseResumeRequest, ParseResumeResponse } from '../types/resume';
+import {Hono} from 'npm:hono'
+import {extractResumeData} from '../utils/resumeParser.ts'
+import {ParseResumeRequest, ParseResumeResponse} from '../types/resume.ts'
 
-const resumeRouter = new Hono();
+const resumeRouter = new Hono()
 
 /**
  * POST /api/parse
@@ -11,8 +11,8 @@ const resumeRouter = new Hono();
 resumeRouter.post('/parse', async (c) => {
   try {
     // Extract request body
-    const { resumeText } = await c.req.json<ParseResumeRequest>();
-    
+    const {resumeText} = await c.req.json<ParseResumeRequest>()
+
     if (!resumeText || typeof resumeText !== 'string') {
       return c.json<ParseResumeResponse>({
         success: false,
@@ -20,9 +20,9 @@ resumeRouter.post('/parse', async (c) => {
           message: 'Resume text is required',
           code: 'MISSING_RESUME_TEXT'
         }
-      }, 400);
+      }, 400)
     }
-    
+
     // Placeholder response - will be implemented with actual parser
     const placeholderData = {
       contactDetails: {
@@ -57,25 +57,25 @@ resumeRouter.post('/parse', async (c) => {
         education: 0.85,
         workExperience: 0.80
       }
-    };
-    
+    }
+
     // Return placeholder response
     return c.json<ParseResumeResponse>({
       success: true,
       data: placeholderData
-    });
-    
+    })
+
   } catch (error) {
-    console.error('Resume parsing error:', error);
-    
+    console.error('Resume parsing error:', error)
+
     return c.json<ParseResumeResponse>({
       success: false,
       error: {
         message: 'Failed to parse resume',
         code: 'PARSING_ERROR'
       }
-    }, 500);
+    }, 500)
   }
-});
+})
 
-export default resumeRouter;
+export default resumeRouter

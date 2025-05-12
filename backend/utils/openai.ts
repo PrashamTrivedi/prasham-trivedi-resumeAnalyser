@@ -1,6 +1,6 @@
 import { OpenAI } from "https://esm.town/v/std/openai";
-import { ResumeData } from "../types/resume";
-import { generatePrompt } from "../prompts/resumePrompts";
+import { ResumeData } from "../types/resume.ts";
+import { generatePrompt } from "../prompts/resumePrompts.ts";
 
 /**
  * Parse resume text using OpenAI and return structured data
